@@ -591,7 +591,13 @@
 </head>
 <body>
     <div class="header">
-        <div class="header-title">🌿 Kwekerij Baas – Microsoft Licentie Kiezer</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="header-title">🌿 Kwekerij Baas – Microsoft Licentie Kiezer</div>
+            <div style="display:flex;gap:8px;">
+                <button onclick="exportState()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">💾 Staat opslaan</button>
+                <button onclick="importState()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">📂 Staat laden</button>
+            </div>
+        </div>
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
         </div>
@@ -1033,31 +1039,73 @@ function initSearchBox() {
 }
 
 function copyToClipboard(tableId) {
-  const table = document.querySelector(`#${tableId} table`);
+  const table = document.getElementById(tableId);
   let text = '';
   table.querySelectorAll('tr').forEach(row => {
     const cells = [];
     row.querySelectorAll('td, th').forEach(cell => cells.push(cell.textContent.trim()));
     text += cells.join('\t') + '\n';
   });
-  navigator.clipboard.writeText(text);
-  alert('Tabel gekopieerd naar klembord!');
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Tabel gekopieerd naar klembord!');
+  }).catch(() => {
+    alert('Kopiëren mislukt. Probeer de CSV download.');
+  });
 }
 
 function downloadCSV(tableId, filename) {
-  const table = document.querySelector(`#${tableId} table`);
-  let csv = '';
+  const table = document.getElementById(tableId);
+  let csv = '\uFEFF'; // BOM for Excel UTF-8
   table.querySelectorAll('tr').forEach(row => {
     const cells = [];
     row.querySelectorAll('td, th').forEach(cell => cells.push('"' + cell.textContent.trim().replace(/"/g, '""') + '"'));
-    csv += cells.join(',') + '\n';
+    csv += cells.join(';') + '\n';
   });
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+function exportState() {
+  const state = { allSelections, savedSelections, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'licentie-staat.json';
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+function importState() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const state = JSON.parse(ev.target.result);
+        if (state.allSelections) {
+          Object.assign(allSelections, state.allSelections);
+          Object.assign(savedSelections, state.savedSelections || {});
+          localStorage.setItem('licenseSelections', JSON.stringify(savedSelections));
+          renderUserList();
+          if (selectedUser) renderDetailPanel();
+          alert('Staat succesvol ingeladen!');
+        }
+      } catch {
+        alert('Ongeldig bestand.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 document.getElementById('saveBtn').addEventListener('click', saveSelection);
