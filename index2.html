@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwekerij Baas – Microsoft Licentie Kiezer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            width: 100%;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #0078d4;
+            transition: width 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .search-box {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+
+        .user-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-item:hover {
+            background: #f9f9f9;
+        }
+
+        .user-item.active {
+            background: #e8f4fd;
+            border-left: 4px solid #0078d4;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #0078d4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar.external {
+            background: #9c27b0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-badge {
+            width: 18px;
+            height: 18px;
+            background: #4caf50;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .main-panel {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+            flex-shrink: 0;
+        }
+
+        .detail-header-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .detail-header-email {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .detail-content {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+            border-left: 4px solid #ccc;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+
+        .section.exchange { border-left-color: #78909c; }
+        .section.basic { border-left-color: #42a5f5; }
+        .section.standard { border-left-color: #1976d2; }
+        .section.premium { border-left-color: #303f9f; }
+        .section.addons { border-left-color: #f57c00; }
+        .section.dynamics { border-left-color: #388e3c; background: #f1f8e9; }
+        .section.special { border-left-color: #9e9e9e; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .apps-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .app-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .app-card:hover {
+            border-color: #0078d4;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .app-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 2px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-card input[type="checkbox"] {
+            display: none;
+        }
+
+        .app-card input[type="checkbox"]:checked ~ .app-checkbox {
+            background: #0078d4;
+            border-color: #0078d4;
+            color: white;
+            font-size: 12px;
+        }
+
+        .app-card input[type="checkbox"]:checked ~ .app-checkbox::after {
+            content: '✓';
+            font-weight: bold;
+        }
+
+        .app-icon {
+            font-size: 20px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .app-details {
+            flex: 1;
+        }
+
+        .app-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .app-desc {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .badge.green {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.blue {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge.orange {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge.darkgreen {
+            background: #f1f8e9;
+            color: #33691e;
+        }
+
+        .recommendation-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 2px solid #0078d4;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .recommendation-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0078d4;
+        }
+
+        .recommendation-sub {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .recommendation-price {
+            font-size: 16px;
+            color: #0078d4;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .addon-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .addon-pill {
+            background: #0078d4;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .addon-pill.green {
+            background: #4caf50;
+        }
+
+        .addon-pill.orange {
+            background: #f57c00;
+        }
+
+        .dynamics-box {
+            background: #f1f8e9;
+            border-left: 4px solid #388e3c;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .dynamics-title {
+            font-weight: 600;
+            color: #388e3c;
+            margin-bottom: 4px;
+        }
+
+        .dynamics-price {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .total-cost {
+            font-size: 14px;
+            font-weight: 600;
+            padding-top: 12px;
+            border-top: 1px solid #ccc;
+            margin-top: 12px;
+            color: #0078d4;
+        }
+
+        .action-bar {
+            padding: 16px 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            border-color: #0078d4;
+            color: #0078d4;
+        }
+
+        .btn-primary {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+
+        .btn-primary:hover {
+            background: #005a9e;
+            border-color: #005a9e;
+            color: white;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .btn-success:hover {
+            background: #388e3c;
+            border-color: #388e3c;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 80vh;
+            overflow: auto;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .modal-table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .modal-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .modal-stats {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+        }
+
+        .no-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
+        }
+
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="header-title">🌿 Kwekerij Baas – Microsoft Licentie Kiezer</div>
+            <div style="display:flex;gap:8px;">
+                <button onclick="exportState()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">💾 Staat opslaan</button>
+                <button onclick="importState()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">📂 Staat laden</button>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Zoeken...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="alle">Alle</button>
+                <button class="filter-btn" data-filter="intern">Intern</button>
+                <button class="filter-btn" data-filter="extern">Extern</button>
+                <button class="filter-btn" data-filter="ingevuld">✓ Ingevuld</button>
+                <button class="filter-btn" data-filter="todo">Te doen</button>
+            </div>
+            <div class="user-list" id="userList"></div>
+        </div>
+
+        <div class="main-panel">
+            <div class="no-selection" id="noSelection">
+                Selecteer een gebruiker om licenties in te stellen
+            </div>
+            <div id="detailPanel" style="display: none; flex: 1; min-height: 0; flex-direction: column; overflow: hidden;">
+                <div class="detail-header">
+                    <div class="detail-header-title" id="detailName"></div>
+                    <div class="detail-header-email" id="detailEmail"></div>
+                </div>
+                <div class="detail-content" id="detailContent"></div>
+                <div class="action-bar">
+                    <button class="btn-primary" id="saveBtn">✓ Opslaan</button>
+                    <button id="clearBtn">Wis selectie</button>
+                    <button id="toggleAllBtn">☑ Alles aan</button>
+                    <button class="btn-primary" id="exportVWCBtn">📋 Export VWC</button>
+                    <button class="btn-success" id="exportMpriseBtn">📦 Export Mprise</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="vwcModal">
+        <div class="modal-content">
+            <div class="modal-title">📋 VWC Abonnementen – Overzicht</div>
+            <div class="modal-stats" id="vwcStats"></div>
+            <table class="modal-table" id="vwcTable">
+                <thead>
+                    <tr>
+                        <th>Naam</th>
+                        <th>E-mail</th>
+                        <th>Type</th>
+                        <th>Aanbevolen abonnement (VWC)</th>
+                        <th>Add-ons VWC</th>
+                        <th>Kosten/mnd VWC</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="modal-buttons">
+                <button id="vwcCopyBtn">📋 Kopieer</button>
+                <button id="vwcDownloadBtn">⬇ Download CSV</button>
+                <button id="vwcCloseBtn">Sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="mpriseModal">
+        <div class="modal-content">
+            <div class="modal-title">📦 Dynamics 365 Business Central – Overzicht voor Mprise</div>
+            <div class="modal-stats" id="mpriseStats"></div>
+            <table class="modal-table" id="mpriseTable">
+                <thead>
+                    <tr>
+                        <th>Naam</th>
+                        <th>E-mail</th>
+                        <th>Business Central Essentials</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="modal-buttons">
+                <button id="mpriseCopyBtn">📋 Kopieer</button>
+                <button id="mpriseDownloadBtn">⬇ Download CSV</button>
+                <button id="mpriseCloseBtn">Sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const USERS = [{"name":"Ineke Goossens","email":"inekego@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Mateusz Jedraszczyk","email":"mateusz@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Hein Kootstra","email":"hein@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft Power Apps Plan 2 Trial","Microsoft Copilot Studio - ad-hocproefversie","Power BI Pro","Microsoft Power Apps for Developer","Power Pages vTrial for Makers"],"external":false},{"name":"Tessa Winter","email":"tessa@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Django Damsma","email":"django@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Power Automate Free","Power BI Pro","Microsoft 365 Copilot"],"external":false},{"name":"Lijn1","email":"lijn1@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Power Apps Premium"],"external":false},{"name":"Harrold Bouwknegt","email":"harrold@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Jeroen Bijl","email":"jeroen@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Martein van Winsen","email":"martein@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Dennis de Kleijn","email":"dennisdk@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"EDI","email":"edi@kwekerijbaas.nl","licenses":["Exchange Online (Abonnement 1)"],"external":false},{"name":"EMBALLAGE","email":"EMBALLAGE@kwekerijbaas.nl","licenses":["Exchange Online (Abonnement 1)"],"external":false},{"name":"Jarno en Rian","email":"jarnoenrian@kwekerijbaas.nl","licenses":["Exchange Online (Abonnement 1)"],"external":false},{"name":"Roos Menkveld","email":"roos@kwekerijbaas.nl","licenses":["Exchange Online (Abonnement 1)"],"external":false},{"name":"Teelt EW4","email":"teeltew@kwekerijbaas.nl","licenses":["Exchange Online (Abonnement 1)"],"external":false},{"name":"Anouk van Diepen","email":"anouk@kwekerijbaas.nl","licenses":["Microsoft Power Automate Free","Exchange Online (Abonnement 1)"],"external":false},{"name":"Jos de Pijper","email":"jos@kwekerijbaas.nl","licenses":["Microsoft Power Automate Free","Exchange Online (Abonnement 1)"],"external":false},{"name":"Transport","email":"Transport@kwekerijbaas.nl","licenses":["Microsoft Power Automate Free","Exchange Online (Abonnement 1)"],"external":false},{"name":"EDI-BCCLOUD","email":"edi-bccloud@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free","Exchange Online (Abonnement 1)"],"external":false},{"name":"Arie Baas","email":"Arie@kwekerijbaas.nl","licenses":["Microsoft 365 Business Basic"],"external":false},{"name":"Ewa Cholewinska","email":"ewa@kwekerijbaas.nl","licenses":["Microsoft 365 Business Basic"],"external":false},{"name":"Fabian Baar","email":"fabian@kwekerijbaas.nl","licenses":["Microsoft 365 Business Basic"],"external":false},{"name":"Ineke Baas","email":"Ineke@kwekerijbaas.nl","licenses":["Microsoft 365 Business Basic"],"external":false},{"name":"Service-account Blue10","email":"srv_blue10@kwekerijbaas.nl","licenses":["Microsoft 365 Business Basic"],"external":false},{"name":"Marcel Heddes","email":"marcel@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft 365 Business Basic"],"external":false},{"name":"Medewerker Techniek","email":"mdw-techniek@kwekerijbaas.nl","licenses":["Microsoft Power Automate Free","Microsoft 365 Business Basic"],"external":false},{"name":"Jakub Kobberger","email":"jakubk@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium"],"external":false},{"name":"Patryk Tanas","email":"patryk@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium"],"external":false},{"name":"Robert Grasu","email":"robert@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium"],"external":false},{"name":"VWC Admin","email":"vwc-admin@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium"],"external":false},{"name":"Isabel Bangma","email":"isabel@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)"],"external":false},{"name":"Eddie Wieten","email":"eddie@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Ola Wilczynski","email":"ola@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Jolien Hakstege","email":"jolien@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro","Microsoft Power Apps for Developer"],"external":false},{"name":"Fimme Brouwer","email":"fimme@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Power Automate Free"],"external":false},{"name":"Manuela Wieten","email":"manuela@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Power Automate Free"],"external":false},{"name":"Dorota Jarowslawska","email":"dorota@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Evert Wieten","email":"evert@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Kees van der Wekken","email":"kees@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Nicola Bauer","email":"nicola@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Oktawia Kobberger","email":"oktawia@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Directie","email":"dir@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free","Microsoft 365 Business Standard"],"external":false},{"name":"Annet van Groesen","email":"annet@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Power Automate Free","Power BI Pro","Microsoft 365 Copilot"],"external":false},{"name":"Mariët Heestermans","email":"marieth@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro","Microsoft 365 Copilot"],"external":false},{"name":"Albert Hornstra","email":"albert@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft Copilot Studio - ad-hocproefversie"],"external":false},{"name":"Lucas Derks","email":"lucas.derks@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)"],"external":false},{"name":"Merel van Dorst","email":"merel.vandorst@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)"],"external":false},{"name":"mpriseanalytics","email":"mpriseanalytics@corp.kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)"],"external":false},{"name":"Bryan de Olde","email":"bryan@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)"],"external":false},{"name":"Margreet Hoeve","email":"margreet@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Prodew5","email":"prodew5@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Mengbaan","email":"mengbaan@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Jacob van der Meer","email":"jacob@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Power Automate Free","Power BI Pro","Microsoft Power Apps for Developer"],"external":false},{"name":"Niels IJzerman","email":"niels@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro","Microsoft Power Apps for Developer"],"external":false},{"name":"Dinand Veldman","email":"dinand@kwekerijbaas.nl","licenses":["Microsoft Power Automate Free"],"external":false},{"name":"Applicatie Beheerder","email":"ab@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free"],"external":false},{"name":"MPriseAdmin","email":"MPriseAdmin@corp.kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free"],"external":false},{"name":"Prod3T36","email":"prod3T36@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free"],"external":false},{"name":"Prodew4","email":"prodew4@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free"],"external":false},{"name":"Mariska Vriezema","email":"mariska@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Power Automate Free"],"external":false},{"name":"Marcus de Regt","email":"marcus@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Finances","email":"finances@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Power Automate Free","Microsoft 365 Business Standard"],"external":false},{"name":"Kenéz Kovács Pebble","email":"Kenez@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Peter van Leeuwen","email":"peter@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft 365 Business Basic"],"external":false},{"name":"Tim Waterman","email":"tim@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Maartje Aben - Roelofs","email":"maartje@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free"],"external":false},{"name":"Frank van Boven","email":"frank@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Chris Breunis","email":"chris@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft Fabric (gratis)","Power BI Pro","Microsoft 365 Business Basic","Planner en Project Abonnement 3"],"external":false},{"name":"Dieter Baas","email":"dieter@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft Power Apps Plan 2 Trial","Power BI Pro","Microsoft Power Apps for Developer","Power Pages vTrial for Makers","Microsoft 365 Copilot","Power Apps Premium"],"external":false},{"name":"Alexander Stiemsma","email":"alexander@kwekerijbaas.nl","licenses":["Power Automate per user plan"],"external":false},{"name":"Jarno Baas","email":"jarno@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Hettie Luitwieler","email":"hettie@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro"],"external":false},{"name":"Katarzyna Josko","email":"katarzyna@kwekerijbaas.nl","licenses":["Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro","Power Apps Premium"],"external":false},{"name":"Lotte Vlietstra","email":"lotte@kwekerijbaas.nl","licenses":["Dynamics 365 Business Central Essentials","Microsoft 365 Business Premium","Microsoft Fabric (gratis)","Microsoft Power Automate Free","Microsoft Copilot Studio - ad-hocproefversie","Power BI Pro"],"external":false},{"name":"Service Account PowerBI","email":"srv-app@kwekerijbaas.nl","licenses":["Microsoft Fabric (gratis)","Microsoft Power Automate Free","Power BI Pro","Microsoft Power Apps for Developer","Microsoft 365 Business Standard","Power Automate per user plan"],"external":false},{"name":"ACF Admin","email":"ACFAdmin@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Administratie","email":"administratie@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Arne Bakker | Mprise","email":"abakker_mprise.nl#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Baastrials","email":"Baastrials@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"BloomingJoy","email":"bloomingjoy@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Chris Breunis | Breunis Adviesdiensten","email":"chris_breunisadviesdiensten.nl#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Herman Hutten","email":"herman@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"HR","email":"hr@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"idee","email":"idee@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Inkoop","email":"inkoop@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Inkoopfacturen","email":"inkoopfacturen@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Jasper VWC","email":"jasper@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Kantoor Fred - boven","email":"Kantoor-Fred@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Kwaliteitszorg","email":"kam@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Lucas Derks","email":"lucas.derks_pebble.net#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Machinelijn","email":"lijn@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Memo","email":"memo@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Merel van Dorst | Pebble","email":"merel.vandorst_pebble.net#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Mprise","email":"mprise@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"On-Premises Directory Synchronization Service Account","email":"Sync_BAAS-DC_89854088ee64@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":false},{"name":"Pascal Geenen | Mprise","email":"pgeenen_mprise.nl#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Planning","email":"planning@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Plein 3T36","email":"plein3t36@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Power BI Gateway","email":"power-bi-gw@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Projectruimte","email":"Projectruimte@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Richard Bults | Mprise","email":"rbults_mprise.nl#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Robbert Klop","email":"robbert@corp.kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Service Account Backup","email":"srv_backup@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Spreekkamer","email":"Spreekkamer@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Stef van der Wiel","email":"stef@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"TdV","email":"tdv@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Techniek","email":"techniek@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Teelt","email":"teelt@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Teelt 3T38","email":"teelt3t@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Thijs Derks","email":"thijs.derks_pebble.net#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Tienco de Vries","email":"tienco@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Ton van 't Erve","email":"ton@corp.kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Vergaderruimte","email":"vergaderruimte@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Verkoop","email":"Verkoop@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Verkoop binnendienst","email":"verkoopbinnendienst@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Verkoopfacturen","email":"verkoopfacturen@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"VWC Beheer","email":"admin@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":false},{"name":"Wageningen University & Research","email":"wur@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Werkvoorbereiding EW4 Kwekerij Baas","email":"werkvoorbereidingew4@kwekerijbaas.nl","licenses":["Unlicensed"],"external":false},{"name":"Wim Van der Sluijs | Mprise","email":"wvdsluijs_mprise.nl#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true},{"name":"Xiaohua Zhang","email":"xiaohua.zhang_pebble.net#EXT#@kwekerijabaas.onmicrosoft.com","licenses":["Unlicensed"],"external":true}];
+
+const INITIAL_SELECTIONS = {"inekego@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"mateusz@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"hein@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"tessa@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"django@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","copilot","sharepoint","dynamics","onedrive"],"lijn1@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","powerapps","dynamics","onedrive"],"harrold@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"jeroen@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"martein@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"dennisdk@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"edi@kwekerijbaas.nl": ["exchange_only"],"EMBALLAGE@kwekerijbaas.nl": ["exchange_only"],"jarnoenrian@kwekerijbaas.nl": ["exchange_only"],"roos@kwekerijbaas.nl": ["exchange_only"],"teeltew@kwekerijbaas.nl": ["exchange_only"],"anouk@kwekerijbaas.nl": ["exchange_only"],"jos@kwekerijbaas.nl": ["exchange_only"],"Transport@kwekerijbaas.nl": ["exchange_only"],"edi-bccloud@kwekerijbaas.nl": ["exchange_only","dynamics"],"Arie@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"ewa@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"fabian@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"Ineke@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"srv_blue10@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"marcel@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"mdw-techniek@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"jakubk@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"patryk@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"robert@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"vwc-admin@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"isabel@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"eddie@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"ola@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"jolien@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","onedrive"],"fimme@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"manuela@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"dorota@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"evert@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"kees@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"nicola@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"oktawia@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"dir@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"annet@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","copilot","sharepoint","dynamics","onedrive"],"marieth@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","copilot","sharepoint","onedrive"],"albert@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"lucas.derks@kwekerijbaas.nl": [],"merel.vandorst@kwekerijbaas.nl": [],"mpriseanalytics@corp.kwekerijbaas.nl": [],"bryan@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"margreet@kwekerijbaas.nl": [],"prodew5@kwekerijbaas.nl": ["dynamics"],"mengbaan@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"jacob@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"niels@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","onedrive"],"dinand@kwekerijbaas.nl": [],"ab@kwekerijbaas.nl": ["dynamics"],"MPriseAdmin@corp.kwekerijbaas.nl": ["dynamics"],"prod3T36@kwekerijbaas.nl": ["dynamics"],"prodew4@kwekerijbaas.nl": ["dynamics"],"mariska@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"marcus@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"finances@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"Kenez@kwekerijbaas.nl": [],"peter@kwekerijbaas.nl": ["email","office_web","teams","sharepoint","onedrive"],"tim@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","onedrive"],"maartje@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","sharepoint","dynamics","onedrive"],"frank@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","onedrive"],"chris@kwekerijbaas.nl": ["email","office_web","powerbi","teams","sharepoint","dynamics","onedrive"],"dieter@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","copilot","sharepoint","powerapps","onedrive"],"alexander@kwekerijbaas.nl": ["powerautomate"],"jarno@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","onedrive"],"hettie@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","onedrive"],"katarzyna@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","powerapps","onedrive"],"lotte@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","dynamics","onedrive"],"srv-app@kwekerijbaas.nl": ["email","office_desktop","office_mobile","office_web","teams","powerbi","sharepoint","powerautomate","onedrive"]};
+
+const APP_DEFINITIONS = {
+  exchange_only: {id: 'exchange_only',icon: '✉️',name: 'Gedeeld e-mailpostvak (50GB)',desc: 'Outlook web, agenda, contacten – geen Teams, geen Office apps',badge: 'inbegrepen',price: 0,section: 'exchange'},
+  email: {id: 'email',icon: '📬',name: 'E-mail & Agenda (Outlook)',desc: '50GB postvak, Outlook web & app, agenda, contacten',badge: 'inbegrepen',price: 0,section: 'basic'},
+  teams: {id: 'teams',icon: '💬',name: 'Microsoft Teams',desc: 'Vergaderen, chatten, bellen, scherm delen, kanalen',badge: 'inbegrepen',price: 0,section: 'basic'},
+  onedrive: {id: 'onedrive',icon: '☁️',name: 'OneDrive 1TB',desc: 'Persoonlijke cloudopslag, synchronisatie, delen',badge: 'inbegrepen',price: 0,section: 'basic'},
+  sharepoint: {id: 'sharepoint',icon: '🗂️',name: 'SharePoint Online',desc: 'Gedeeld documentbeheer, intranet, teamsites',badge: 'inbegrepen',price: 0,section: 'basic'},
+  office_web: {id: 'office_web',icon: '🌐',name: 'Office Online (web)',desc: 'Word, Excel, PowerPoint, OneNote in de browser – gratis gebruik',badge: 'inbegrepen',price: 0,section: 'basic'},
+  office_desktop: {id: 'office_desktop',icon: '🖥️',name: 'Office desktop (Word / Excel / PowerPoint / Outlook)',desc: 'Volledige installatie op 5 pc\'s of Macs, inclusief Publisher en Access',badge: 'inbegrepen (bovenop Basic)',price: 0,section: 'standard'},
+  office_mobile: {id: 'office_mobile',icon: '📱',name: 'Office mobiele apps',desc: 'Word, Excel, PowerPoint op smartphone en tablet',badge: 'inbegrepen (bovenop Basic)',price: 0,section: 'standard'},
+  intune: {id: 'intune',icon: '🛡️',name: 'Microsoft Intune',desc: 'Device management (MDM/MAM) – beheer van bedrijfsapparaten en apps',badge: 'inbegrepen (bovenop Standard)',price: 0,section: 'premium'},
+  defender: {id: 'defender',icon: '🔐',name: 'Microsoft Defender for Business',desc: 'Geavanceerde endpoint-beveiliging, antivirus, threat protection',badge: 'inbegrepen (bovenop Standard)',price: 0,section: 'premium'},
+  azure_premium: {id: 'azure_premium',icon: '🔑',name: 'Azure AD Premium P1',desc: 'Conditional Access, MFA-beleid, SSO, Identity Protection',badge: 'inbegrepen (bovenop Standard)',price: 0,section: 'premium'},
+  powerbi: {id: 'powerbi',icon: '📈',name: 'Power BI Pro',desc: 'Publiceren en delen van rapporten en dashboards met collega\'s',badge: '€15,00/mnd – betaald',price: 15.00,section: 'addons'},
+  copilot: {id: 'copilot',icon: '🤖',name: 'Microsoft 365 Copilot',desc: 'AI-assistent in Word, Excel, Teams, Outlook en andere M365-apps',badge: '€31,50/mnd – betaald',price: 31.50,section: 'addons'},
+  powerapps: {id: 'powerapps',icon: '⚙️',name: 'Power Apps Premium',desc: 'Zakelijke apps bouwen en gebruiken met premium connectors en Dataverse',badge: '€19,64/mnd – betaald',price: 19.64,section: 'addons'},
+  powerautomate: {id: 'powerautomate',icon: '🔄',name: 'Power Automate per gebruiker',desc: 'Geavanceerde workflows en automatisering met premium connectors',badge: '€17,80/mnd – betaald',price: 17.80,section: 'addons'},
+  dynamics: {id: 'dynamics',icon: '📦',name: 'Business Central Essentials',desc: 'Financieel beheer, inkoop, verkoop, voorraad, productie, CRM-basis',badge: 'prijs via Mprise – apart contract',price: 0,section: 'dynamics'},
+  no_license: {id: 'no_license',icon: '🔕',name: 'Geen licentie nodig',desc: 'Account blijft bestaan maar heeft geen Microsoft-licentie nodig',badge: '',price: 0,section: 'special'},
+  delete_account: {id: 'delete_account',icon: '🗑️',name: 'Account verwijderen',desc: 'Extern of inactief account – kan worden verwijderd uit de tenant',badge: '',price: 0,section: 'special'}
+};
+
+const SUBSCRIPTIONS = {
+  exchange: {name: 'Exchange Online Plan 1 – €4,89/mnd (via VWC)',subtitle: 'Gedeeld postvak zonder Office apps',price: 4.89,apps: ['exchange_only'],basePrice: true,vwc: true},
+  basic: {name: 'Microsoft 365 Business Basic – €8,19/mnd (via VWC)',subtitle: 'E-mail, Teams, OneDrive en Office Online – geen desktop installaties',price: 8.19,apps: ['email', 'teams', 'onedrive', 'sharepoint', 'office_web'],basePrice: true,vwc: true},
+  standard: {name: 'Microsoft 365 Business Standard – €19,35/mnd (via VWC)',subtitle: 'Alles van Basic + desktop Office installaties op 5 apparaten',price: 19.35,apps: ['office_desktop', 'office_mobile'],basePrice: true,vwc: true},
+  premium: {name: 'Microsoft 365 Business Premium – €24,95/mnd (via VWC)',subtitle: 'Alles van Standard + geavanceerde beveiliging en apparaatbeheer',price: 24.95,apps: ['intune', 'defender', 'azure_premium'],basePrice: true,vwc: true},
+  addons: {name: 'Add-ons Microsoft 365 – via VWC (bovenop basisabonnement)',subtitle: 'Elk apart betaald per gebruiker per maand, ongeacht het gekozen basisabonnement',apps: ['powerbi', 'copilot', 'powerapps', 'powerautomate'],basePrice: false,vwc: true},
+  dynamics: {name: 'Dynamics 365 Business Central Essentials – via Mprise (apart contract)',subtitle: 'ERP-pakket voor financiën, inkoop, verkoop en logistiek – NIET via VWC, aparte leverancier Mprise',apps: ['dynamics'],basePrice: false,vwc: false,mprise: true},
+  special: {name: 'Speciaal',subtitle: 'Accounts zonder licentieverplichting',apps: ['no_license', 'delete_account'],basePrice: false,vwc: false}
+};
+
+let selectedUser = null;
+let savedSelections = JSON.parse(localStorage.getItem('licenseSelections')) || {};
+let allSelections = Object.assign({}, INITIAL_SELECTIONS);
+
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function renderUserList() {
+  const listHtml = USERS.map(user => `
+    <div class="user-item ${selectedUser?.email === user.email ? 'active' : ''}" data-email="${user.email}">
+      <div class="user-avatar ${user.external ? 'external' : ''}">${getInitials(user.name)}</div>
+      <div class="user-info">
+        <div class="user-name">${user.name}</div>
+        <div class="user-email">${user.email}</div>
+      </div>
+      ${savedSelections[user.email] ? '<div class="user-badge">✓</div>' : ''}
+    </div>
+  `).join('');
+  document.getElementById('userList').innerHTML = listHtml;
+  document.querySelectorAll('.user-item').forEach(item => {
+    item.addEventListener('click', () => selectUser(item.dataset.email));
+  });
+}
+
+function selectUser(email) {
+  selectedUser = USERS.find(u => u.email === email);
+  allSelections[email] = allSelections[email] || [];
+  renderUserList();
+  renderDetailPanel();
+}
+
+function renderDetailPanel() {
+  if (!selectedUser) {
+    document.getElementById('detailPanel').style.display = 'none';
+    document.getElementById('noSelection').style.display = 'flex';
+    return;
+  }
+  document.getElementById('noSelection').style.display = 'none';
+  document.getElementById('detailPanel').style.display = 'flex';
+  document.getElementById('detailName').textContent = selectedUser.name;
+  document.getElementById('detailEmail').textContent = `${selectedUser.email} ${selectedUser.external ? '(Extern)' : ''}`;
+
+  let content = '';
+  const rec = getRecommendation(selectedUser.email);
+  content += `
+    <div class="recommendation-box">
+      <div class="recommendation-title">Aanbevolen abonnement (VWC)</div>
+      <div class="recommendation-sub">${rec.name}</div>
+      <div class="recommendation-price">${rec.basePriceStr}</div>
+  `;
+
+  if (rec.addons.length > 0) {
+    content += '<div class="addon-pills">';
+    rec.addons.forEach(addon => {
+      const color = addon === 'dynamics' ? 'green' : (addon === 'powerbi' || addon === 'copilot' || addon === 'powerapps' || addon === 'powerautomate' ? 'orange' : '');
+      content += `<div class="addon-pill ${color}">${APP_DEFINITIONS[addon].name.split(' ')[0]}</div>`;
+    });
+    content += '</div>';
+  }
+
+  if (rec.hasDynamics) {
+    content += `
+      <div class="dynamics-box">
+        <div class="dynamics-title">📦 Dynamics 365 via Mprise</div>
+        <div class="dynamics-price">Prijs via apart Mprise contract</div>
+      </div>
+    `;
+  }
+
+  if (rec.totalCost > 0) {
+    content += `<div class="total-cost">VWC maandelijks totaal: €${rec.totalCost.toFixed(2)}</div>`;
+  }
+  content += '</div>';
+
+  Object.keys(SUBSCRIPTIONS).forEach(key => {
+    const sub = SUBSCRIPTIONS[key];
+    content += `
+      <div class="section ${key}">
+        <div class="section-title">${sub.name}</div>
+        <div class="section-subtitle">${sub.subtitle}</div>
+        <div class="apps-grid">
+          ${sub.apps.map(appId => {
+            const app = APP_DEFINITIONS[appId];
+            const isChecked = allSelections[selectedUser.email]?.includes(appId);
+            return `
+              <label class="app-card">
+                <input type="checkbox" data-app="${appId}" ${isChecked ? 'checked' : ''}>
+                <div class="app-checkbox"></div>
+                <div class="app-icon">${app.icon}</div>
+                <div class="app-details">
+                  <div class="app-name">${app.name}</div>
+                  <div class="app-desc">${app.desc}</div>
+                </div>
+                ${app.badge ? `<div class="badge ${app.badge.includes('betaald') ? 'orange' : (app.badge.includes('Mprise') ? 'darkgreen' : (app.badge.includes('bovenop') ? 'blue' : 'green'))}">${app.badge}</div>` : ''}
+              </label>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('detailContent').innerHTML = content;
+  document.querySelectorAll('.app-card input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => handleAppChange(e.target.dataset.app, e.target.checked));
+  });
+
+  updateProgress();
+}
+
+function handleAppChange(appId, checked) {
+  if (!selectedUser) return;
+
+  if (!allSelections[selectedUser.email]) allSelections[selectedUser.email] = [];
+
+  const special = ['no_license', 'delete_account'];
+  const mutualExclusive = ['exchange_only'];
+
+  if (special.includes(appId)) {
+    if (checked) {
+      allSelections[selectedUser.email] = [appId];
+      renderDetailPanel();
+    }
+  } else if (mutualExclusive.includes(appId)) {
+    if (checked) {
+      allSelections[selectedUser.email] = allSelections[selectedUser.email].filter(a => !special.includes(a));
+      allSelections[selectedUser.email] = [appId, ...allSelections[selectedUser.email].filter(a => a === 'dynamics')];
+      renderDetailPanel();
+    }
+  } else {
+    if (checked) {
+      allSelections[selectedUser.email] = allSelections[selectedUser.email].filter(a => !special.includes(a) && a !== 'exchange_only');
+      if (!allSelections[selectedUser.email].includes(appId)) {
+        allSelections[selectedUser.email].push(appId);
+      }
+    } else {
+      allSelections[selectedUser.email] = allSelections[selectedUser.email].filter(a => a !== appId);
+    }
+  }
+}
+
+function getRecommendation(email) {
+  const apps = allSelections[email] || [];
+  let name = 'Geen licentie nodig';
+  let price = 0;
+  let addons = [];
+  let hasDynamics = false;
+
+  if (apps.includes('delete_account')) {
+    name = 'Account verwijderen';
+    price = 0;
+  } else if (apps.includes('no_license')) {
+    name = 'Geen licentie nodig';
+    price = 0;
+  } else if (apps.includes('exchange_only') && !apps.some(a => !['exchange_only', 'dynamics'].includes(a))) {
+    name = 'Exchange Online Plan 1';
+    price = 4.89;
+  } else if (apps.some(a => ['intune', 'defender', 'azure_premium'].includes(a))) {
+    name = 'Microsoft 365 Business Premium';
+    price = 24.95;
+    const base = ['email', 'teams', 'onedrive', 'sharepoint', 'office_web', 'office_desktop', 'office_mobile'];
+    addons = apps.filter(a => !base.includes(a) && a !== 'dynamics' && !['intune', 'defender', 'azure_premium'].includes(a));
+  } else if (apps.some(a => ['office_desktop', 'office_mobile'].includes(a))) {
+    name = 'Microsoft 365 Business Standard';
+    price = 19.35;
+    const base = ['email', 'teams', 'onedrive', 'sharepoint', 'office_web', 'office_desktop', 'office_mobile'];
+    addons = apps.filter(a => !base.includes(a) && a !== 'dynamics');
+  } else if (apps.some(a => ['email', 'teams', 'onedrive', 'sharepoint', 'office_web'].includes(a))) {
+    name = 'Microsoft 365 Business Basic';
+    price = 8.19;
+    const base = ['email', 'teams', 'onedrive', 'sharepoint', 'office_web'];
+    addons = apps.filter(a => !base.includes(a) && a !== 'dynamics');
+  }
+
+  if (apps.includes('dynamics')) {
+    hasDynamics = true;
+  }
+
+  let totalCost = price;
+  addons.forEach(a => {
+    totalCost += APP_DEFINITIONS[a].price;
+  });
+
+  return {name, price, addons, hasDynamics, basePriceStr: price > 0 ? `€${price.toFixed(2)}/mnd` : 'N.v.t.', totalCost};
+}
+
+function saveSelection() {
+  if (!selectedUser) return;
+  savedSelections[selectedUser.email] = true;
+  localStorage.setItem('licenseSelections', JSON.stringify(savedSelections));
+  renderUserList();
+  updateProgress();
+}
+
+function clearSelection() {
+  if (!selectedUser) return;
+  allSelections[selectedUser.email] = [];
+  renderDetailPanel();
+}
+
+function toggleAllApps() {
+  if (!selectedUser) return;
+  const regularApps = Object.keys(APP_DEFINITIONS).filter(id => !['exchange_only', 'no_license', 'delete_account'].includes(id));
+  const current = allSelections[selectedUser.email] || [];
+  const hasAllRegular = regularApps.every(a => current.includes(a));
+
+  if (hasAllRegular) {
+    allSelections[selectedUser.email] = current.filter(a => !regularApps.includes(a));
+  } else {
+    allSelections[selectedUser.email] = [...new Set([...current, ...regularApps])];
+  }
+  renderDetailPanel();
+}
+
+function exportVWC() {
+  const data = USERS.map(user => {
+    const rec = getRecommendation(user.email);
+    const saved = savedSelections[user.email] ? '✓ Opgeslagen' : '';
+    const addonsStr = rec.addons.map(a => APP_DEFINITIONS[a].name).join(', ');
+    return {name: user.name, email: user.email, type: user.external ? 'Extern' : 'Intern', subscription: rec.name, addons: addonsStr, cost: rec.totalCost > 0 ? `€${rec.totalCost.toFixed(2)}` : '€0,00', status: saved};
+  }).filter(r => !r.subscription.includes('verwijderen') && r.subscription !== 'Geen licentie nodig');
+
+  const stats = `Opgeslagen: ${Object.keys(savedSelections).length} | Totaal VWC maandelijks: €${data.reduce((s, r) => s + parseFloat(r.cost.replace('€', '').replace(',', '.')), 0).toFixed(2)}`;
+  document.getElementById('vwcStats').innerHTML = `<strong>${stats}</strong>`;
+
+  let html = '';
+  data.forEach(r => {
+    html += `<tr><td>${r.name}</td><td>${r.email}</td><td>${r.type}</td><td>${r.subscription}</td><td>${r.addons}</td><td>${r.cost}</td><td>${r.status}</td></tr>`;
+  });
+  document.querySelector('#vwcTable tbody').innerHTML = html;
+  document.getElementById('vwcModal').classList.add('active');
+}
+
+function exportMprise() {
+  const data = USERS.map(user => {
+    const hasDynamics = allSelections[user.email]?.includes('dynamics');
+    const saved = savedSelections[user.email];
+    let status = '–';
+    if (hasDynamics && saved) status = '✓ Ja';
+    else if (hasDynamics && !saved) status = '○ Niet bevestigd';
+
+    return {name: user.name, email: user.email, bc: hasDynamics ? '✓' : '–', status};
+  });
+
+  const count = data.filter(r => r.bc === '✓').length;
+  document.getElementById('mpriseStats').innerHTML = `<strong>Totaal gebruikers met Business Central: ${count}</strong>`;
+
+  let html = '';
+  data.forEach(r => {
+    html += `<tr><td>${r.name}</td><td>${r.email}</td><td>${r.bc}</td><td>${r.status}</td></tr>`;
+  });
+  document.querySelector('#mpriseTable tbody').innerHTML = html;
+  document.getElementById('mpriseModal').classList.add('active');
+}
+
+function updateProgress() {
+  const saved = Object.keys(savedSelections).length;
+  const total = USERS.length;
+  const percent = (saved / total) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+}
+
+function initFilterButtons() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      let filtered = USERS;
+      if (filter === 'intern') filtered = USERS.filter(u => !u.external);
+      if (filter === 'extern') filtered = USERS.filter(u => u.external);
+      if (filter === 'ingevuld') filtered = USERS.filter(u => savedSelections[u.email]);
+      if (filter === 'todo') filtered = USERS.filter(u => !savedSelections[u.email]);
+
+      const listHtml = filtered.map(user => `
+        <div class="user-item ${selectedUser?.email === user.email ? 'active' : ''}" data-email="${user.email}">
+          <div class="user-avatar ${user.external ? 'external' : ''}">${getInitials(user.name)}</div>
+          <div class="user-info">
+            <div class="user-name">${user.name}</div>
+            <div class="user-email">${user.email}</div>
+          </div>
+          ${savedSelections[user.email] ? '<div class="user-badge">✓</div>' : ''}
+        </div>
+      `).join('');
+      document.getElementById('userList').innerHTML = listHtml;
+      document.querySelectorAll('.user-item').forEach(item => {
+        item.addEventListener('click', () => selectUser(item.dataset.email));
+      });
+    });
+  });
+}
+
+function initSearchBox() {
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    const filtered = USERS.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+    const listHtml = filtered.map(user => `
+      <div class="user-item ${selectedUser?.email === user.email ? 'active' : ''}" data-email="${user.email}">
+        <div class="user-avatar ${user.external ? 'external' : ''}">${getInitials(user.name)}</div>
+        <div class="user-info">
+          <div class="user-name">${user.name}</div>
+          <div class="user-email">${user.email}</div>
+        </div>
+        ${savedSelections[user.email] ? '<div class="user-badge">✓</div>' : ''}
+      </div>
+    `).join('');
+    document.getElementById('userList').innerHTML = listHtml;
+    document.querySelectorAll('.user-item').forEach(item => {
+      item.addEventListener('click', () => selectUser(item.dataset.email));
+    });
+  });
+}
+
+function copyToClipboard(tableId) {
+  const table = document.getElementById(tableId);
+  let text = '';
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = [];
+    row.querySelectorAll('td, th').forEach(cell => cells.push(cell.textContent.trim()));
+    text += cells.join('\t') + '\n';
+  });
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Tabel gekopieerd naar klembord!');
+  }).catch(() => {
+    alert('Kopiëren mislukt. Probeer de CSV download.');
+  });
+}
+
+function downloadCSV(tableId, filename) {
+  const table = document.getElementById(tableId);
+  let csv = '\uFEFF'; // BOM for Excel UTF-8
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = [];
+    row.querySelectorAll('td, th').forEach(cell => cells.push('"' + cell.textContent.trim().replace(/"/g, '""') + '"'));
+    csv += cells.join(';') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+function exportState() {
+  const state = { allSelections, savedSelections, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'licentie-staat.json';
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+function importState() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const state = JSON.parse(ev.target.result);
+        if (state.allSelections) {
+          Object.assign(allSelections, state.allSelections);
+          Object.assign(savedSelections, state.savedSelections || {});
+          localStorage.setItem('licenseSelections', JSON.stringify(savedSelections));
+          renderUserList();
+          if (selectedUser) renderDetailPanel();
+          alert('Staat succesvol ingeladen!');
+        }
+      } catch {
+        alert('Ongeldig bestand.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+document.getElementById('saveBtn').addEventListener('click', saveSelection);
+document.getElementById('clearBtn').addEventListener('click', clearSelection);
+document.getElementById('toggleAllBtn').addEventListener('click', toggleAllApps);
+document.getElementById('exportVWCBtn').addEventListener('click', exportVWC);
+document.getElementById('exportMpriseBtn').addEventListener('click', exportMprise);
+
+document.getElementById('vwcCopyBtn').addEventListener('click', () => copyToClipboard('vwcTable'));
+document.getElementById('vwcDownloadBtn').addEventListener('click', () => downloadCSV('vwcTable', 'vwc-licenties.csv'));
+document.getElementById('vwcCloseBtn').addEventListener('click', () => document.getElementById('vwcModal').classList.remove('active'));
+
+document.getElementById('mpriseCopyBtn').addEventListener('click', () => copyToClipboard('mpriseTable'));
+document.getElementById('mpriseDownloadBtn').addEventListener('click', () => downloadCSV('mpriseTable', 'mprise-dynamics.csv'));
+document.getElementById('mpriseCloseBtn').addEventListener('click', () => document.getElementById('mpriseModal').classList.remove('active'));
+
+initFilterButtons();
+initSearchBox();
+renderUserList();
+updateProgress();
+    </script>
+</body>
+</html>
